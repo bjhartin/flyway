@@ -18,6 +18,7 @@ package com.googlecode.flyway.core.dbsupport;
 import com.googlecode.flyway.core.dbsupport.h2.H2SqlStatementBuilder;
 import com.googlecode.flyway.core.dbsupport.oracle.OracleSqlStatementBuilder;
 import com.googlecode.flyway.core.dbsupport.postgresql.PostgreSQLSqlStatementBuilder;
+import com.googlecode.flyway.core.dbsupport.sqlserver.SQLServerSqlStatementBuilder;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
