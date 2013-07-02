@@ -62,6 +62,7 @@
         <module>flyway-ant</module>
         <module>flyway-ant-largetest</module>
         <module>flyway-sbt-plugin</module>
+        <module>flyway-sql-parser</module>
     </modules>
 
     <distributionManagement>
