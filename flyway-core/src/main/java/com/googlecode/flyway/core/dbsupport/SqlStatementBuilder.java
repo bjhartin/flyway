@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2010-2013 the original author or authors.
+ * Copyright 2010-2013 Axel Fontaine and the many contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -262,7 +262,7 @@ public class SqlStatementBuilder {
      */
     protected boolean endsWithOpenMultilineStringLiteral(String line) {
         //Ignore all special characters that naturally occur in SQL, but are not opening or closing string literals
-        String[] tokens = StringUtils.tokenizeToStringArray(line, " <>;:=|(),");
+        String[] tokens = StringUtils.tokenizeToStringArray(line, " @<>;:=|(),");
 
         List<TokenType> delimitingTokens = extractStringLiteralDelimitingTokens(tokens);
 
@@ -301,7 +301,7 @@ public class SqlStatementBuilder {
     private List<TokenType> extractStringLiteralDelimitingTokens(String[] tokens) {
         List<TokenType> delimitingTokens = new ArrayList<TokenType>();
         for (String token : tokens) {
-            String cleanToken = removeEscapedQuotes(token);
+            String cleanToken = removeCharsetCasting(removeEscapedQuotes(token));
 
             if (alternateQuote == null) {
                 String alternateQuoteFromToken = extractAlternateOpenQuote(cleanToken);
@@ -354,6 +354,16 @@ public class SqlStatementBuilder {
      */
     protected String removeEscapedQuotes(String token) {
         return StringUtils.replaceAll(token, "''", "");
+    }
+
+    /**
+     * Removes charset casting that prefixes string literals.
+     * Must be implemented in dialect specific sub classes.
+     * @param token The token to parse.
+     * @return The cleaned token.
+     */
+    protected String removeCharsetCasting(String token) {
+        return token;
     }
 
     /**

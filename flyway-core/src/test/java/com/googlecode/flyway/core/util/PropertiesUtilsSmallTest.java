@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2010-2013 the original author or authors.
+ * Copyright 2010-2013 Axel Fontaine and the many contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,20 @@ public class PropertiesUtilsSmallTest {
     public void getIntProperty() {
         Properties properties = new Properties();
         properties.setProperty("consoleWidth", "");
+        assertEquals(80, PropertiesUtils.getIntProperty(properties, "consoleWidth", 80));
+    }
+
+    @Test
+    public void getIntPropertyBlank() {
+        Properties properties = new Properties();
+        properties.setProperty("consoleWidth", "    ");
+        assertEquals(80, PropertiesUtils.getIntProperty(properties, "consoleWidth", 80));
+    }
+
+    @Test
+    public void getIntPropertyTab() {
+        Properties properties = new Properties();
+        properties.setProperty("consoleWidth", "\t");
         assertEquals(80, PropertiesUtils.getIntProperty(properties, "consoleWidth", 80));
     }
 }

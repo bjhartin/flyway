@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2010-2013 the original author or authors.
+ * Copyright 2010-2013 Axel Fontaine and the many contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,6 +58,41 @@ public class MySQLSqlStatementBuilderSmallTest {
     }
 
     @Test
+    public void stringEndingInX() throws Exception {
+        builder.addLine("INSERT INTO Tablename (id) VALUES (' x');");
+
+        assertTrue(builder.isTerminated());
+    }
+
+    @Test
+    public void stringEndingInB() throws Exception {
+        builder.addLine("INSERT INTO Tablename (id) VALUES (' b');");
+
+        assertTrue(builder.isTerminated());
+    }
+
+    @Test
+    public void charsetCastedString() throws Exception {
+        builder.addLine("INSERT INTO Tablename (id) VALUES (_utf8'hello');");
+
+        assertTrue(builder.isTerminated());
+    }
+
+    @Test
+    public void charsetCastedComplexString() throws Exception {
+        builder.addLine("INSERT INTO Tablename (id) VALUES (_utf8'text with spaces and \" and pretend casts _utf8\\'hello\\' here _utf8');");
+
+        assertTrue(builder.isTerminated());
+    }
+
+    @Test
+    public void stringEndingInCastPrefix() throws Exception {
+        builder.addLine("INSERT INTO Tablename (id) VALUES ('text goes here _utf8');");
+
+        assertTrue(builder.isTerminated());
+    }
+
+    @Test
     public void hexLiteral() throws Exception {
         builder.addLine("INSERT INTO Tablename (id) VALUES (x'5B1A5933964C4AA59F3013D3B3F3414D');");
 
@@ -67,6 +102,13 @@ public class MySQLSqlStatementBuilderSmallTest {
     @Test
     public void binaryLiteral() throws Exception {
         builder.addLine("INSERT INTO Tablename (id) VALUES (b'10110011');");
+
+        assertTrue(builder.isTerminated());
+    }
+
+    @Test
+    public void trailingEscapedBackSlash() throws Exception {
+        builder.addLine("INSERT INTO Tablename (id) VALUES ('\\\\');");
 
         assertTrue(builder.isTerminated());
     }

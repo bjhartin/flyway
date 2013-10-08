@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2010-2013 the original author or authors.
+ * Copyright 2010-2013 Axel Fontaine and the many contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,8 +54,8 @@ public class PostgreSQLSuperUserMigrationMediumTest {
      * Tests clean and migrate for PostgreSQL Types.
      */
     @Test
-    public void type() throws Exception {
-        flyway.setLocations("migration/dbsupport/postgresql/sql/type");
+    public void basetype() throws Exception {
+        flyway.setLocations("migration/dbsupport/postgresql/sql/basetype");
         flyway.migrate();
 
         flyway.clean();

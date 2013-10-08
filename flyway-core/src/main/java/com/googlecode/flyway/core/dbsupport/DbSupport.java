@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2010-2013 the original author or authors.
+ * Copyright 2010-2013 Axel Fontaine and the many contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -73,7 +73,12 @@ public abstract class DbSupport {
      */
     public Schema getCurrentSchema() {
         try {
-            return getSchema(doGetCurrentSchema());
+            String schemaName = doGetCurrentSchema();
+            if (schemaName == null) {
+                return null;
+            }
+
+            return getSchema(schemaName);
         } catch (SQLException e) {
             throw new FlywayException("Unable to retrieve the current schema for the connection", e);
         }

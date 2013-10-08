@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2010-2013 the original author or authors.
+ * Copyright 2010-2013 Axel Fontaine and the many contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 package com.googlecode.flyway.core.resolver.java;
 
 import com.googlecode.flyway.core.api.FlywayException;
-import com.googlecode.flyway.core.dbsupport.DbSupport;
 import com.googlecode.flyway.core.migration.java.JavaMigration;
 import com.googlecode.flyway.core.resolver.MigrationExecutor;
-import com.googlecode.flyway.core.dbsupport.JdbcTemplate;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
+
+import java.sql.Connection;
 
 /**
  * Adapter for executing migrations implementing JavaMigration.
@@ -40,10 +40,10 @@ public class JavaMigrationExecutor implements MigrationExecutor {
         this.javaMigration = javaMigration;
     }
 
-    public void execute(JdbcTemplate jdbcTemplate, DbSupport dbSupport) {
+    public void execute(Connection connection) {
         try {
             javaMigration.migrate(new org.springframework.jdbc.core.JdbcTemplate(
-                    new SingleConnectionDataSource(jdbcTemplate.getConnection(), true)));
+                    new SingleConnectionDataSource(connection, true)));
         } catch (Exception e) {
             throw new FlywayException("Migration failed !", e);
         }

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2010-2013 the original author or authors.
+ * Copyright 2010-2013 Axel Fontaine and the many contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,9 +17,9 @@ package com.googlecode.flyway.core.resolver.jdbc;
 
 import com.googlecode.flyway.core.api.FlywayException;
 import com.googlecode.flyway.core.api.migration.jdbc.JdbcMigration;
-import com.googlecode.flyway.core.dbsupport.DbSupport;
 import com.googlecode.flyway.core.resolver.MigrationExecutor;
-import com.googlecode.flyway.core.dbsupport.JdbcTemplate;
+
+import java.sql.Connection;
 
 /**
  * Adapter for executing migrations implementing JdbcMigration.
@@ -39,9 +39,9 @@ public class JdbcMigrationExecutor implements MigrationExecutor {
         this.jdbcMigration = jdbcMigration;
     }
 
-    public void execute(JdbcTemplate jdbcTemplate, DbSupport dbSupport) {
+    public void execute(Connection connection) {
         try {
-            jdbcMigration.migrate(jdbcTemplate.getConnection());
+            jdbcMigration.migrate(connection);
         } catch (Exception e) {
             throw new FlywayException("Migration failed !", e);
         }

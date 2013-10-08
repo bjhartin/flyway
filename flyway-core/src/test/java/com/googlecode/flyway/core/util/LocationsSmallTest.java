@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2010-2013 the original author or authors.
+ * Copyright 2010-2013 Axel Fontaine and the many contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -63,6 +63,15 @@ public class LocationsSmallTest {
         assertEquals(2, locationList.size());
         assertTrue(locationList.contains(new Location("db/migration")));
         assertTrue(locationList.contains(new Location("db/migrationtest")));
+    }
+
+    @Test
+    public void mergeLocationsSimilarButNoOverlapCamelCase() {
+        Locations locations = new Locations("/com/xxx/Star/", "/com/xxx/StarTrack/");
+        List<Location> locationList = locations.getLocations();
+        assertEquals(2, locationList.size());
+        assertTrue(locationList.contains(new Location("com/xxx/Star")));
+        assertTrue(locationList.contains(new Location("com/xxx/StarTrack")));
     }
 
     @Test

@@ -1,10 +1,9 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <!--
-    Detailed information how to contribute: http://flywaydb.org/howToContribute.html
+    Detailed information how to contribute: http://flywaydb.org/contribute/howToContribute.html
 
     A number of Jdbc drivers are unfortunately not available from Maven Central due to licensing issues.
-    Instructions for installing them: http://flywaydb.org/devEnvironmentSetup.html
+    Instructions for installing them: http://flywaydb.org/contribute/devEnvironmentSetup.html
 
     If your contribution does not require changes to the database-specific code it is also possible to run the build
     without having to install the Jdbc drivers using mvn -P-MediumTests
@@ -12,7 +11,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.googlecode.flyway</groupId>
     <artifactId>flyway-parent</artifactId>
-    <version>2.2-SNAPSHOT</version>
+    <version>0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>${project.artifactId}</name>
     <description>
@@ -38,18 +37,12 @@
             <id>axel</id>
             <name>Axel Fontaine</name>
         </developer>
-        <developer>
-            <id>christian</id>
-            <name>Christian Dedie</name>
-        </developer>
-        <developer>
-            <id>chris</id>
-            <name>Chris Wewerka</name>
-        </developer>
     </developers>
 
     <modules>
         <module>flyway-core</module>
+        <module>flyway-gradle-plugin</module>
+        <module>flyway-gradle-plugin-largetest</module>
         <module>flyway-maven-plugin</module>
         <module>flyway-maven-plugin-largetest</module>
         <module>flyway-sample</module>
@@ -77,10 +70,26 @@
         </repository>
     </distributionManagement>
 
+    <repositories>
+        <repository>
+            <id>maven-central</id>
+            <url>http://repo1.maven.org/maven2</url>
+        </repository>
+        <repository>
+            <id>gradle</id>
+            <url>http://repo.gradle.org/gradle/libs-releases-local</url>
+        </repository>
+        <repository>
+            <id>gradle-workaround</id>
+            <url>http://flywaydb.org/repo</url>
+        </repository>
+    </repositories>
+
     <properties>
         <version.spring>2.5.6</version.spring>
         <version.appengine>1.7.0</version.appengine>
         <version.maven>2.2.1</version.maven>
+        <version.gradle>1.6</version.gradle>
         <version.h2>1.3.170</version.h2>
         <version.equinox>3.6.0.v20100517</version.equinox>
         <version.equinoxcommon>3.6.0.v20100503</version.equinoxcommon>
@@ -252,6 +261,10 @@
                     <version>2.3</version>
                 </plugin>
                 <plugin>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.1</version>
+                </plugin>
+                <plugin>
                     <artifactId>maven-deploy-plugin</artifactId>
                     <version>2.7</version>
                 </plugin>
@@ -281,6 +294,10 @@
                     <artifactId>plexus-maven-plugin</artifactId>
                     <version>1.3.8</version>
                 </plugin>
+                <plugin>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>2.9.1</version>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -307,7 +324,6 @@
             </plugin>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
                 <configuration>
                     <source>1.5</source>
                     <target>1.5</target>
@@ -338,13 +354,15 @@
                 </executions>
             </plugin>
             <plugin>
-                <artifactId>maven-release-plugin</artifactId>
-                <version>2.4</version>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+                <version>2.1</version>
+            </plugin>
+            <plugin>
+                <artifactId>maven-scm-plugin</artifactId>
+                <version>1.8.1</version>
                 <configuration>
-                    <autoVersionSubmodules>true</autoVersionSubmodules>
-                    <mavenExecutorId>forked-path</mavenExecutorId>
-                    <preparationGoals>clean install</preparationGoals>
-                    <tagNameFormat>flyway-@{project.version}</tagNameFormat>
+                    <tag>flyway-${project.version}</tag>
                 </configuration>
             </plugin>
             <plugin>
@@ -358,6 +376,7 @@
                     <failIfMissing>true</failIfMissing>
                     <encoding>UTF-8</encoding>
                     <excludes>
+                        <exclude>.idea/**</exclude>
                         <exclude>**/*.sh</exclude>
                         <exclude>**/*.txt</exclude>
                         <exclude>**/*.cnf</exclude>
@@ -368,6 +387,8 @@
                         <exclude>**/*.ids</exclude>
                         <exclude>**/*.ipr</exclude>
                         <exclude>**/*.iws</exclude>
+                        <exclude>**/*.bin</exclude>
+                        <exclude>**/*.lock</exclude>
                         <exclude>.gitignore</exclude>
                         <exclude>.gitattributes</exclude>
                         <exclude>.travis.yml</exclude>
@@ -418,6 +439,19 @@
             </plugin>
         </plugins>
     </build>
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>2.9.1</version>
+                <configuration>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+        </plugins>
+    </reporting>
+
     <profiles>
         <profile>
             <id>MediumTests</id>
@@ -490,8 +524,23 @@
             <build>
                 <plugins>
                     <plugin>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <configuration>
+                            <encoding>UTF-8</encoding>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.2</version>
+                        <version>1.4</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>

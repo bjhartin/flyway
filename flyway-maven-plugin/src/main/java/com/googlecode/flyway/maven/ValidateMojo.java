@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2010-2013 the original author or authors.
+ * Copyright 2010-2013 Axel Fontaine and the many contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,9 +25,9 @@ import com.googlecode.flyway.core.Flyway;
  * @since 0.9
  */
 @SuppressWarnings({"UnusedDeclaration", "JavaDoc"})
-public class ValidateMojo extends AbstractMigrationLoadingMojo {
+public class ValidateMojo extends AbstractFlywayMojo {
     @Override
-    protected void doExecuteWithMigrationConfig(Flyway flyway) throws Exception {
+    protected void doExecute(Flyway flyway) throws Exception {
         flyway.validate();
     }
 }

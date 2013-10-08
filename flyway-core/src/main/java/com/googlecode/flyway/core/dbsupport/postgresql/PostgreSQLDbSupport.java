@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2010-2013 the original author or authors.
+ * Copyright 2010-2013 Axel Fontaine and the many contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ import com.googlecode.flyway.core.dbsupport.DbSupport;
 import com.googlecode.flyway.core.dbsupport.JdbcTemplate;
 import com.googlecode.flyway.core.dbsupport.Schema;
 import com.googlecode.flyway.core.dbsupport.SqlStatementBuilder;
+import com.googlecode.flyway.core.util.StringUtils;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -53,8 +54,17 @@ public class PostgreSQLDbSupport extends DbSupport {
 
     @Override
     protected void doSetCurrentSchema(Schema schema) throws SQLException {
+        if (schema == null) {
+            jdbcTemplate.execute("SELECT set_config('search_path', '', false)");
+            return;
+        }
+
         String searchPath = jdbcTemplate.queryForString("SHOW search_path");
-        jdbcTemplate.execute("SET search_path = " + schema + "," + searchPath);
+        if (StringUtils.hasText(searchPath)) {
+            jdbcTemplate.execute("SET search_path = " + schema + "," + searchPath);
+        } else {
+            jdbcTemplate.execute("SET search_path = " + schema);
+        }
     }
 
     public boolean supportsDdlTransactions() {
@@ -75,7 +85,7 @@ public class PostgreSQLDbSupport extends DbSupport {
 
     @Override
     public String doQuote(String identifier) {
-        return "\"" + identifier + "\"";
+        return "\"" + StringUtils.replaceAll(identifier, "\"", "\"\"") + "\"";
     }
 
     @Override

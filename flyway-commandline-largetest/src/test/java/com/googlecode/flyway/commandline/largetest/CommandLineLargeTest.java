@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2010-2013 the original author or authors.
+ * Copyright 2010-2013 Axel Fontaine and the many contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,6 +59,13 @@ public class CommandLineLargeTest {
         String stdOut = runFlywayCommandLine(0, null, "migrate", "-user=SA", "-url=jdbc:hsqldb:mem:flyway_db", "-driver=org.hsqldb.jdbcDriver", "-sqlMigrationPrefix=Mig");
         assertTrue(stdOut.contains("777"));
         assertTrue(stdOut.contains("Successfully applied 1 migration"));
+    }
+
+    @Test
+    public void jarFile() throws Exception {
+        String stdOut = runFlywayCommandLine(0, null, "migrate", "-user=SA", "-url=jdbc:hsqldb:mem:flyway_db",
+                "-driver=org.hsqldb.jdbcDriver", "-locations=db/migration,com/googlecode/flyway/sample/migration");
+        assertTrue(stdOut.contains("Successfully applied 3 migrations"));
     }
 
     /**

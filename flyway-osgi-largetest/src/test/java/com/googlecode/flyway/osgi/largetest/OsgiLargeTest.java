@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2010-2013 the original author or authors.
+ * Copyright 2010-2013 Axel Fontaine and the many contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,6 +47,7 @@ public class OsgiLargeTest {
         List<String> args = new ArrayList<String>();
 
         String installDir = new File(getInstallDir()).getAbsolutePath();
+        addShellIfNeeded(args);
         args.add(installDir + "/run." + batchFileExtensionForCurrentSystem());
 
         ProcessBuilder builder = new ProcessBuilder(args);
@@ -64,17 +65,28 @@ public class OsgiLargeTest {
         return stdOut;
     }
 
+    private void addShellIfNeeded(List<String> args) {
+        if (!isWindowsOs()) {
+            args.add("sh");
+        }
+    }
+
     /**
      * Extension for the current systems batch file.
      *
      * @return returns cmd for windows systems, sh for other systems
      */
     private String batchFileExtensionForCurrentSystem() {
-        String osname = System.getProperty("os.name", "generic").toLowerCase();
-        if (osname.startsWith("windows")) {
-            return "cmd";
-        }
-        return "sh";
+        return isWindowsOs() ? "cmd" : "sh";
+    }
+
+    /**
+     * Check if we are running on Windows OS
+     *
+     * @return true for windows, otherwise false
+     */
+    private boolean isWindowsOs() {
+        return System.getProperty("os.name", "generic").toLowerCase().startsWith("windows");
     }
 
     /**

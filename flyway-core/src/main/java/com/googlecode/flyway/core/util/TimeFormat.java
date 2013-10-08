@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2010-2013 the original author or authors.
+ * Copyright 2010-2013 Axel Fontaine and the many contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,6 @@
  * limitations under the License.
  */
 package com.googlecode.flyway.core.util;
-
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 /**
  * Formats execution times.
@@ -34,10 +30,9 @@ public class TimeFormat {
      * Formats this execution time.
      *
      * @param millis The number of millis.
-     *
      * @return The execution in a human-readable format.
      */
     public static String format(long millis) {
-        return String.format("%02d:%02d.%03ds", millis/60000, (millis%60000)/1000, (millis%1000));
+        return String.format("%02d:%02d.%03ds", millis / 60000, (millis % 60000) / 1000, (millis % 1000));
     }
 }

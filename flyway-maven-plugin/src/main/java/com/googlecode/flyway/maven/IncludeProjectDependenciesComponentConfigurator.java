@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2010-2013 the original author or authors.
+ * Copyright 2010-2013 Axel Fontaine and the many contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -47,7 +47,6 @@ public class IncludeProjectDependenciesComponentConfigurator extends AbstractCom
             throws ComponentConfigurationException {
 
         addProjectDependenciesToClassRealm(expressionEvaluator, containerRealm);
-        converterLookup.registerConverter(new ClassRealmConverter(containerRealm));
         ObjectWithFieldsConverter converter = new ObjectWithFieldsConverter();
         converter.processConfiguration(converterLookup, component, containerRealm.getClassLoader(), configuration,
                 expressionEvaluator, listener);

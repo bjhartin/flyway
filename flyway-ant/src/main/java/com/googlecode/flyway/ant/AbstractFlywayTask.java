@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2010-2013 the original author or authors.
+ * Copyright 2010-2013 Axel Fontaine and the many contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -328,14 +328,7 @@ public abstract class AbstractFlywayTask extends Task {
 
             doExecute(flyway);
         } catch (Exception e) {
-            log.error(e.toString());
-
-            @SuppressWarnings({"ThrowableResultOfMethodCallIgnored"})
-            Throwable rootCause = ExceptionUtils.getRootCause(e);
-            if (rootCause != null) {
-                log.error("Caused by " + rootCause.toString());
-            }
-            throw new BuildException("Flyway Error: " + e.toString(), e);
+            throw new BuildException("Flyway Error: " + e.toString(), ExceptionUtils.getRootCause(e));
         }
     }
 

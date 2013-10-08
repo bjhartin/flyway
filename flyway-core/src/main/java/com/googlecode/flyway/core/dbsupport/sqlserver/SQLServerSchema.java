@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2010-2013 the original author or authors.
+ * Copyright 2010-2013 Axel Fontaine and the many contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -113,7 +113,7 @@ public class SQLServerSchema extends Schema {
         List<Map<String, String>> constraintNames =
                 jdbcTemplate.queryForList(
                         "SELECT table_name, constraint_name FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS" +
-                                " WHERE constraint_type = 'FOREIGN KEY' and table_schema=?",
+                                " WHERE constraint_type in ('FOREIGN KEY','CHECK') and table_schema=?",
                         name);
 
         List<String> statements = new ArrayList<String>();

@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2010-2013 the original author or authors.
+ * Copyright 2010-2013 Axel Fontaine and the many contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,8 +16,11 @@
 package com.googlecode.flyway.core.migration;
 
 import com.googlecode.flyway.core.Flyway;
-import com.googlecode.flyway.core.api.*;
+import com.googlecode.flyway.core.api.FlywayException;
+import com.googlecode.flyway.core.api.MigrationInfo;
 import com.googlecode.flyway.core.api.MigrationState;
+import com.googlecode.flyway.core.api.MigrationType;
+import com.googlecode.flyway.core.api.MigrationVersion;
 import com.googlecode.flyway.core.dbsupport.DbSupport;
 import com.googlecode.flyway.core.dbsupport.DbSupportFactory;
 import com.googlecode.flyway.core.dbsupport.JdbcTemplate;
@@ -51,11 +54,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 /**
  * Test to demonstrate the migration functionality.
@@ -67,6 +66,7 @@ public abstract class MigrationTestCase {
      */
     protected static final String BASEDIR = "migration/sql";
 
+    protected DataSource dataSource;
     private Connection connection;
     protected DbSupport dbSupport;
 
@@ -80,14 +80,14 @@ public abstract class MigrationTestCase {
         if (customPropertiesFile.canRead()) {
             customProperties.load(new FileInputStream(customPropertiesFile));
         }
-        DataSource migrationDataSource = createDataSource(customProperties);
+        dataSource = createDataSource(customProperties);
 
-        connection = migrationDataSource.getConnection();
+        connection = dataSource.getConnection();
         dbSupport = DbSupportFactory.createDbSupport(connection);
         jdbcTemplate = dbSupport.getJdbcTemplate();
 
         flyway = new Flyway();
-        flyway.setDataSource(migrationDataSource);
+        flyway.setDataSource(dataSource);
         flyway.setValidationMode(ValidationMode.ALL);
         flyway.clean();
     }
@@ -187,6 +187,7 @@ public abstract class MigrationTestCase {
      */
     private void assertChecksum(MetaDataTableRow appliedMigration) {
         SqlMigrationResolver sqlMigrationResolver = new SqlMigrationResolver(
+                dbSupport,
                 new Location(BASEDIR),
                 PlaceholderReplacer.NO_PLACEHOLDERS,
                 "UTF-8",
@@ -252,7 +253,8 @@ public abstract class MigrationTestCase {
             flyway.migrate();
             fail();
         } catch (FlywayException e) {
-            //Expected
+            // root cause of exception must be defined
+            assertNotNull(e.getCause());
         }
 
         MigrationInfo migration = flyway.info().current();
@@ -522,18 +524,20 @@ public abstract class MigrationTestCase {
     @Test
     public void setCurrentSchema() throws Exception {
         Schema schema = dbSupport.getSchema("current_schema_test");
-        schema.create();
+        try {
+            schema.create();
 
-        flyway.setSchemas("current_schema_test");
-        flyway.clean();
+            flyway.setSchemas("current_schema_test");
+            flyway.clean();
 
-        flyway.setLocations("migration/current_schema");
-        Map<String, String> placeholders = new HashMap<String, String>();
-        placeholders.put("schema1", dbSupport.quote("current_schema_test"));
-        flyway.setPlaceholders(placeholders);
-        flyway.migrate();
-
-        schema.drop();
+            flyway.setLocations("migration/current_schema");
+            Map<String, String> placeholders = new HashMap<String, String>();
+            placeholders.put("schema1", dbSupport.quote("current_schema_test"));
+            flyway.setPlaceholders(placeholders);
+            flyway.migrate();
+        } finally {
+            schema.drop();
+        }
     }
 
     @Test
@@ -663,7 +667,7 @@ public abstract class MigrationTestCase {
      * Upgrade a Flyway 1.7 format metadata table to the Flyway 2.0 format.
      */
     private void upgradeMetaDataTableTo20Format() throws Exception {
-        CompositeMigrationResolver migrationResolver = new CompositeMigrationResolver(new Locations(BASEDIR), "UTF-8", "V", ".sql", new HashMap<String, String>(), "${", "}");
+        CompositeMigrationResolver migrationResolver = new CompositeMigrationResolver(dbSupport, new Locations(BASEDIR), "UTF-8", "V", ".sql", new HashMap<String, String>(), "${", "}");
 
         MetaDataTableTo20FormatUpgrader upgrader = new MetaDataTableTo20FormatUpgrader(dbSupport, dbSupport.getCurrentSchema().getTable(flyway.getTable()), migrationResolver);
         upgrader.upgrade();

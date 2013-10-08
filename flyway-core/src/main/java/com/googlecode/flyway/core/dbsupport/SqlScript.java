@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2010-2013 the original author or authors.
+ * Copyright 2010-2013 Axel Fontaine and the many contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ public class SqlScript {
     /**
      * Creates a new sql script from this source with these placeholders to replace.
      *
-     * @param sqlScriptSource The sql script as a text block with all placeholders still present.
+     * @param sqlScriptSource The sql script as a text block with all placeholders already replaced.
      * @param dbSupport       The database-specific support.
      */
     public SqlScript(String sqlScriptSource, DbSupport dbSupport) {

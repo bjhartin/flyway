@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2010-2013 the original author or authors.
+ * Copyright 2010-2013 Axel Fontaine and the many contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,15 +46,21 @@ public abstract class MavenTestCase {
 
     @Test
     public void regular() throws Exception {
-        String stdOut = runMaven(0, "regular", "clean", "compile", "flyway:init", "flyway:status", "-Dflyway.initVersion=0.1");
+        String stdOut = runMaven(0, "regular", "clean", "compile", "flyway:init", "flyway:status", "-Dflyway.initVersion=0.1", "-Dflyway.user=SA");
         assertTrue(stdOut.contains("<< Flyway Init >>"));
     }
 
     @Test
     public void migrate() throws Exception {
-        String stdOut = runMaven(0, "regular", "clean", "compile", "flyway:migrate");
+        String stdOut = runMaven(0, "regular", "clean", "compile", "flyway:migrate", "-Dflyway.user=SA");
         assertTrue(stdOut.contains("Successfully applied 2 migrations"));
         assertFalse(stdOut.contains("deprecated"));
+    }
+
+    @Test
+    public void sample() throws Exception {
+        String stdOut = runMaven(0, "sample", "clean", "compile", "flyway:migrate");
+        assertTrue(stdOut.contains("Successfully applied 4 migrations"));
     }
 
     @Test
@@ -94,6 +100,12 @@ public abstract class MavenTestCase {
     public void locationsProperty() throws Exception {
         String stdOut = runMaven(0, "locations-property", "clean", "compile", "flyway:migrate");
         assertTrue(stdOut.contains("Successfully applied 2 migrations"));
+    }
+
+    @Test
+    public void skip() throws Exception {
+        String stdOut = runMaven(0, "skip", "flyway:migrate");
+        assertTrue(stdOut.contains("Skipping Flyway execution"));
     }
 
     /**

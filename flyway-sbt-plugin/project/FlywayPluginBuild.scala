@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2010-2013 the original author or authors.
+ * Copyright 2010-2013 Axel Fontaine and the many contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 import sbt._
 import scala._
 import Keys._
@@ -32,7 +31,7 @@ object FlywayPluginBuild extends Build {
       name := "sbt-flyway",
       organization := "com.googlecode.flyway",
       version := flywayVersion,
-      crossScalaVersions := Seq("2.9.1", "2.9.2", "2.9.3", "2.10.1"),
+      crossScalaVersions := Seq("2.9.2"),
       resolvers += (
         "Local Maven Repository" at Path.userHome.asFile.toURI.toURL + ".m2/repository"
         ),

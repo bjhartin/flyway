@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2010-2013 the original author or authors.
+ * Copyright 2010-2013 Axel Fontaine and the many contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package com.googlecode.flyway.core.resolver.sql;
 
+import com.googlecode.flyway.core.dbsupport.h2.H2DbSupport;
 import com.googlecode.flyway.core.resolver.ResolvedMigration;
 import com.googlecode.flyway.core.util.Location;
 import com.googlecode.flyway.core.util.PlaceholderReplacer;
@@ -39,7 +40,7 @@ public class SqlMigrationResolverMediumTest {
         String path = URLDecoder.decode(getClass().getClassLoader().getResource("migration/subdir").getPath(), "UTF-8");
 
         SqlMigrationResolver sqlMigrationResolver =
-                new SqlMigrationResolver(new Location("filesystem:" + path), PlaceholderReplacer.NO_PLACEHOLDERS, "UTF-8", "V", ".sql");
+                new SqlMigrationResolver(null, new Location("filesystem:" + path), PlaceholderReplacer.NO_PLACEHOLDERS, "UTF-8", "V", ".sql");
         Collection<ResolvedMigration> migrations = sqlMigrationResolver.resolveMigrations();
 
         assertEquals(3, migrations.size());

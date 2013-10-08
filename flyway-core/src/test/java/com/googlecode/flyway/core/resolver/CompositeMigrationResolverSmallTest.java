@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2010-2013 the original author or authors.
+ * Copyright 2010-2013 Axel Fontaine and the many contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import static org.junit.Assert.assertTrue;
 public class CompositeMigrationResolverSmallTest {
     @Test
     public void resolveMigrationsMultipleLocations() {
-        MigrationResolver migrationResolver = new CompositeMigrationResolver(
+        MigrationResolver migrationResolver = new CompositeMigrationResolver(null,
                 new Locations("migration/subdir/dir2", "migration.outoforder", "migration/subdir/dir1"),
                 "UTF-8", "V", ".sql", new HashMap<String, String>(), "${", "}");
 

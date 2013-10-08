@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2010-2013 the original author or authors.
+ * Copyright 2010-2013 Axel Fontaine and the many contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,11 +16,11 @@
 package com.googlecode.flyway.maven.largetest;
 
 /**
- * Executes the tests against Maven 3.
+ * Executes the tests against Maven 3.0.
  */
 public class Maven3LargeTest extends MavenTestCase {
     @Override
     protected String getMavenVersion() {
-        return "3.0.5";
+        return "3.1.0";
     }
 }

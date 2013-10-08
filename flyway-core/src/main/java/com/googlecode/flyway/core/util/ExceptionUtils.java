@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2010-2013 the original author or authors.
+ * Copyright 2010-2013 Axel Fontaine and the many contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,20 +31,19 @@ public class ExceptionUtils {
      *
      * @param throwable The throwable to inspect.
      *
-     * @return The root cause or {@code null} if the throwable is null or doesn't have a cause.
+     * @return The root cause or the throwable itself if it doesn't have a cause.
      */
     public static Throwable getRootCause(Throwable throwable) {
         if (throwable == null) {
             return null;
         }
 
-        Throwable cause = throwable.getCause();
-        Throwable rootCause = null;
-        while (cause != null) {
-            rootCause = cause;
-            cause = cause.getCause();
+        Throwable cause = throwable;
+        Throwable rootCause;
+        while ((rootCause = cause.getCause()) != null) {
+            cause = rootCause;
         }
 
-        return rootCause;
+        return cause;
     }
 }

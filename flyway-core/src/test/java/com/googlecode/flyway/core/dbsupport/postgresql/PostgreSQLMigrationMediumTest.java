@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2010-2013 the original author or authors.
+ * Copyright 2010-2013 Axel Fontaine and the many contributors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,16 @@
  */
 package com.googlecode.flyway.core.dbsupport.postgresql;
 
+import com.googlecode.flyway.core.Flyway;
 import com.googlecode.flyway.core.migration.MigrationTestCase;
 import com.googlecode.flyway.core.util.jdbc.DriverDataSource;
+import com.googlecode.flyway.core.util.jdbc.JdbcUtils;
 import org.junit.Test;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
@@ -41,6 +46,23 @@ public class PostgreSQLMigrationMediumTest extends MigrationTestCase {
     @Override
     protected String getQuoteLocation() {
         return "migration/quote";
+    }
+
+    /**
+     * Tests clean and migrate for PostgreSQL Types.
+     */
+    @Test
+    public void type() throws Exception {
+        flyway.setLocations("migration/dbsupport/postgresql/sql/type");
+        flyway.migrate();
+
+        flyway.clean();
+
+        // Running migrate again on an unclean database, triggers duplicate object exceptions.
+        flyway.migrate();
+
+        // Clean again, to prevent tests with non superuser rights to fail.
+        flyway.clean();
     }
 
     /**
@@ -98,7 +120,7 @@ public class PostgreSQLMigrationMediumTest extends MigrationTestCase {
         flyway.setLocations("migration/dbsupport/postgresql/sql/view");
         flyway.migrate();
 
-        assertEquals(150, jdbcTemplate.queryForInt("SELECT value FROM v"));
+        assertEquals(150, jdbcTemplate.queryForInt("SELECT value FROM \"\"\"v\"\"\""));
 
         flyway.clean();
 
@@ -196,4 +218,27 @@ public class PostgreSQLMigrationMediumTest extends MigrationTestCase {
         flyway.migrate();
     }
 
+    @Test
+    public void emptySearchPath() {
+        Flyway flyway1 = new Flyway();
+        DriverDataSource driverDataSource = (DriverDataSource) dataSource;
+        flyway1.setDataSource(new DriverDataSource(
+                null, driverDataSource.getUrl(), driverDataSource.getUser(), driverDataSource.getPassword()) {
+            @Override
+            public Connection getConnection() throws SQLException {
+                Connection connection = super.getConnection();
+                Statement statement = null;
+                try {
+                    statement = connection.createStatement();
+                    statement.execute("SELECT set_config('search_path', '', false)");
+                } finally {
+                    JdbcUtils.closeStatement(statement);
+                }
+                return connection;
+            }
+        });
+        flyway1.setLocations(BASEDIR);
+        flyway1.setSchemas("public");
+        flyway1.migrate();
+    }
 }
