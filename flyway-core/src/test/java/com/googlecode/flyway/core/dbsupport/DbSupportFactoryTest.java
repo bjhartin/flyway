@@ -29,6 +29,8 @@ import org.junit.Test;
 import static org.mockito.Mockito.mock;
 
 import java.sql.*;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
@@ -55,5 +57,19 @@ public class DbSupportFactoryTest {
         when(metaData.getDatabaseMajorVersion()).thenReturn(1);
         when(metaData.getDatabaseMinorVersion()).thenReturn(0);
         assert(DbSupportFactory.createDbSupport(conn) instanceof H2DbSupport);
+    }
+
+    @Test
+    public void customDbSupportImplementationSupported() {
+        Map<String, Class<? extends DbSupport>> oldCustomDbSupportClasses = new HashMap<String, Class<? extends DbSupport>>(DbSupportFactory.customDbSupportRegistry);
+        Connection conn = mock(Connection.class);
+        DbSupport customH2DbSupport = new H2DbSupport(conn){};
+
+        try {
+            DbSupportFactory.customDbSupportRegistry.put("H2", customH2DbSupport.getClass());
+            assertEquals(customH2DbSupport.getClass(), DbSupportFactory.lookupDbSupport("H2"));
+        } finally {
+            DbSupportFactory.customDbSupportRegistry = oldCustomDbSupportClasses;
+        }
     }
 }

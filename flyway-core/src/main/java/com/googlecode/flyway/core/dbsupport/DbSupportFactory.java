@@ -27,7 +27,6 @@ import com.googlecode.flyway.core.dbsupport.sqlserver.SQLServerDbSupport;
 import com.googlecode.flyway.core.util.logging.Log;
 import com.googlecode.flyway.core.util.logging.LogFactory;
 
-import javax.management.RuntimeErrorException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
@@ -43,12 +42,25 @@ public class DbSupportFactory {
      */
     private static final Log LOG = LogFactory.getLog(DbSupportFactory.class);
 
+    private static Map<String, Class<? extends DbSupport>> dbSupportRegistry = new HashMap<String, Class<? extends DbSupport>>();
+    public static Map<String, Class<? extends DbSupport>> customDbSupportRegistry = new HashMap<String, Class<? extends DbSupport>>();
+
+    // Static initializer.
+    static {
+        dbSupportRegistry.put("Apache Derby", DerbyDbSupport.class);
+        dbSupportRegistry.put("H2", H2DbSupport.class);
+        dbSupportRegistry.put("HSQL Database Engine", HsqlDbSupport.class);
+        dbSupportRegistry.put("Microsoft SQL Server", SQLServerDbSupport.class);
+        dbSupportRegistry.put("MySQL", MySQLDbSupport.class);
+        dbSupportRegistry.put("Oracle", OracleDbSupport.class);
+        dbSupportRegistry.put("PostgreSQL", PostgreSQLDbSupport.class);
+        dbSupportRegistry.put("DB2", DB2DbSupport.class);
+    }
+
     /**
      * Prevent instantiation.
      */
-    private DbSupportFactory() {
-        //Do nothing
-    }
+    private DbSupportFactory() {}
 
     /**
      * Initializes the appropriate DbSupport class for the database product used by the data source.
@@ -61,33 +73,20 @@ public class DbSupportFactory {
 
         LOG.debug("Database: " + databaseProductName);
 
-        Class dbSupportClass = lookupDbSupport(databaseProductName);
-
+        Class<? extends DbSupport> dbSupportClass = lookupDbSupport(databaseProductName);
 
         try {
-            return (DbSupport) dbSupportClass.getConstructor(Connection.class).newInstance(connection);
+            return dbSupportClass.getConstructor(Connection.class).newInstance(connection);
         } catch (Exception e) {
             throw new RuntimeException("Unable to create instance of " + dbSupportClass.getName(), e);
         }
     }
 
-    public static Class lookupDbSupport(String databaseProductName) {
-        Map<String, Class> registry = new HashMap<String, Class>();
-        registry.put("Apache Derby", DerbyDbSupport.class);
-        registry.put("H2", H2DbSupport.class);
-        registry.put("HSQL Database Engine", HsqlDbSupport.class);
-        registry.put("Microsoft SQL Server", SQLServerDbSupport.class);
-        registry.put("MySQL", MySQLDbSupport.class);
-        registry.put("Oracle", OracleDbSupport.class);
-        registry.put("PostgreSQL", PostgreSQLDbSupport.class);
-        registry.put("DB2", DB2DbSupport.class);
-
-        for(String key:registry.keySet()) {
-            if(databaseProductName.startsWith(key))
-                return registry.get(key);
-        }
-
-        throw new FlywayException("Unsupported Database: " + databaseProductName);
+    public static Class<? extends DbSupport> lookupDbSupport(String databaseProductName) {
+        Class<? extends DbSupport> result = matchDbProductName(databaseProductName, customDbSupportRegistry);
+        if(null == result) result = matchDbProductName(databaseProductName, dbSupportRegistry);
+        if(null == result) throw new FlywayException("Unsupported Database: " + databaseProductName);
+        return result;
     }
 
     /**
@@ -115,6 +114,15 @@ public class DbSupportFactory {
         } catch (SQLException e) {
             throw new FlywayException("Error while determining database product name", e);
         }
+    }
+
+    private static Class<? extends DbSupport> matchDbProductName(String databaseProductName, Map<String, Class<? extends DbSupport>> registry) {
+        Class<? extends DbSupport> result = null;
+        for(String key:registry.keySet()) {
+            if(databaseProductName.startsWith(key))
+                return registry.get(key);
+        }
+        return result;
     }
 
 }
