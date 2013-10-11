@@ -43,7 +43,7 @@ public class DbSupportFactory {
     private static final Log LOG = LogFactory.getLog(DbSupportFactory.class);
 
     private static Map<String, Class<? extends DbSupport>> dbSupportRegistry = new HashMap<String, Class<? extends DbSupport>>();
-    public static Map<String, Class<? extends DbSupport>> customDbSupportRegistry = new HashMap<String, Class<? extends DbSupport>>();
+    private static Map<String, Class<? extends DbSupport>> customDbSupportRegistry = new HashMap<String, Class<? extends DbSupport>>();
 
     // Static initializer.
     static {
@@ -89,6 +89,23 @@ public class DbSupportFactory {
         return result;
     }
 
+    public static void addCustomDbSupport(String dbProductNamePrefix, String dbSupportClassName) {
+        try {
+            Class<? extends DbSupport> c = Class.forName(dbSupportClassName).asSubclass(DbSupport.class);
+            DbSupportFactory.customDbSupportRegistry.put(dbProductNamePrefix, c);
+        } catch(ClassNotFoundException e) {
+            throw new FlywayException("Could not find custom DB support class for database " + dbProductNamePrefix + ": " + dbSupportClassName, e);
+        }
+    }
+
+    public static Class<? extends DbSupport> getCustomDbSupport(String dbProductNamePrefix) {
+        return customDbSupportRegistry.get(dbProductNamePrefix);
+    }
+
+    public static void clearCustomDbSupport(){
+        customDbSupportRegistry.clear();
+    }
+
     /**
      * Retrieves the name of the database product.
      *
@@ -124,5 +141,4 @@ public class DbSupportFactory {
         }
         return result;
     }
-
 }
