@@ -27,9 +27,12 @@ import com.googlecode.flyway.core.dbsupport.sqlserver.SQLServerDbSupport;
 import com.googlecode.flyway.core.util.logging.Log;
 import com.googlecode.flyway.core.util.logging.LogFactory;
 
+import javax.management.RuntimeErrorException;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Factory for obtaining the correct DbSupport instance for the current connection.
@@ -58,35 +61,30 @@ public class DbSupportFactory {
 
         LOG.debug("Database: " + databaseProductName);
 
-        if (databaseProductName.startsWith("Apache Derby")) {
-            return new DerbyDbSupport(connection);
+        Class dbSupportClass = lookupDbSupport(databaseProductName);
+
+
+        try {
+            return (DbSupport) dbSupportClass.getConstructor(Connection.class).newInstance(connection);
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to create instance of " + dbSupportClass.getName(), e);
         }
-        if (databaseProductName.startsWith("H2")) {
-            return new H2DbSupport(connection);
-        }
-        if (databaseProductName.contains("HSQL Database Engine")) {
-            // For regular Hsql and the Google Cloud SQL local default DB.
-            return new HsqlDbSupport(connection);
-        }
-        if (databaseProductName.startsWith("Microsoft SQL Server")) {
-            return new SQLServerDbSupport(connection);
-        }
-        if (databaseProductName.contains("MySQL")) {
-            // For regular MySQL and Google Cloud SQL.
-            // Google Cloud SQL returns different names depending on the environment and the SDK version.
-            //   ex.: Google SQL Service/MySQL
-            return new MySQLDbSupport(connection);
-        }
-        if (databaseProductName.startsWith("Oracle")) {
-            return new OracleDbSupport(connection);
-        }
-        if (databaseProductName.startsWith("PostgreSQL")) {
-            return new PostgreSQLDbSupport(connection);
-        }
-        if (databaseProductName.startsWith("DB2")) {
-            // DB2 also returns the OS it's running on.
-            //   ex.: DB2/NT
-            return new DB2DbSupport(connection);
+    }
+
+    public static Class lookupDbSupport(String databaseProductName) {
+        Map<String, Class> registry = new HashMap<String, Class>();
+        registry.put("Apache Derby", DerbyDbSupport.class);
+        registry.put("H2", H2DbSupport.class);
+        registry.put("HSQL Database Engine", HsqlDbSupport.class);
+        registry.put("Microsoft SQL Server", SQLServerDbSupport.class);
+        registry.put("MySQL", MySQLDbSupport.class);
+        registry.put("Oracle", OracleDbSupport.class);
+        registry.put("PostgreSQL", PostgreSQLDbSupport.class);
+        registry.put("DB2", DB2DbSupport.class);
+
+        for(String key:registry.keySet()) {
+            if(databaseProductName.startsWith(key))
+                return registry.get(key);
         }
 
         throw new FlywayException("Unsupported Database: " + databaseProductName);
